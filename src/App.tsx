@@ -1,62 +1,73 @@
-import { useState } from 'react'
+import { usePlayers } from './hooks/usePlayers'
+import { Player } from './components/Player'
 import './App.css'
 
 function App() {
-  const [player1Life, setPlayer1Life] = useState(20)
-  const [player2Life, setPlayer2Life] = useState(20)
+  const {
+    players,
+    addPlayer,
+    removePlayer,
+    increaseCounter,
+    decreaseCounter,
+    updatePlayerName,
+    resetPlayerCounter,
+    resetPlayers,
+  } = usePlayers()
 
-  const handlePlayer1Minus = () => {
-    setPlayer1Life((prev) => (prev > 0 ? prev - 1 : 0))
-  }
+  const haveTwoOrMorePlayers = players.length > 2
 
-  const handlePlayer1Plus = () => {
-    setPlayer1Life((prev) => prev + 1)
-  }
-
-  const handlePlayer2Minus = () => {
-    setPlayer2Life((prev) => (prev > 0 ? prev - 1 : 0))
-  }
-
-  const handlePlayer2Plus = () => {
-    setPlayer2Life((prev) => prev + 1)
-  }
-
-  const handleRestart = () => {
-    const isConfirmed = window.confirm("¿Estás seguro de que quieres reiniciar los puntos de vida a 20 para ambos jugadores?")
+  const handleResetCounters = () => {
+    const isConfirmed = window.confirm(
+      '¿Estás seguro de que quieres reiniciar los puntos de vida a 20 para todos los jugadores?'
+    )
     if (isConfirmed) {
-      setPlayer1Life(20)
-      setPlayer2Life(20)
+      resetPlayerCounter()
+    }
+  }
+
+  const handleResetAll = () => {
+    const isConfirmed = window.confirm(
+      '¿Estás seguro de que quieres reiniciar la partida a 2 jugadores con 20 vidas?'
+    )
+    if (isConfirmed) {
+      resetPlayers()
     }
   }
 
   return (
     <main className="app-container">
-      <h1>Magic The Gathering</h1>
-      <p className="subtitle">Life Counter</p>
-      
+      <header className="app-header">
+        <h1>Magic The Gathering</h1>
+        <p className="subtitle">Life Counter</p>
+      </header>
+
+      <section className="controls-bar">
+        <button className="add-player-button" onClick={addPlayer}>
+          + Agregar Jugador
+        </button>
+        <button className="restart-button" onClick={handleResetCounters}>
+          Reiniciar Vidas
+        </button>
+        {haveTwoOrMorePlayers && (
+          <button className="reset-players-button" onClick={handleResetAll}>
+            Restablecer a 2 Jugadores
+          </button>
+        )}
+      </section>
+
       <div className="players-container">
-        {/* Jugador 1 */}
-        <div className="player-card">
-          <h2>Jugador 1</h2>
-          <div className="life-points">{player1Life}</div>
-          <div className="button-group">
-            <button className="btn-minus" onClick={handlePlayer1Minus}>-1 Resta</button>
-            <button className="btn-plus" onClick={handlePlayer1Plus}>+1 Suma</button>
-          </div>
-        </div>
-
-        {/* Jugador 2 */}
-        <div className="player-card">
-          <h2>Jugador 2</h2>
-          <div className="life-points">{player2Life}</div>
-          <div className="button-group">
-            <button className="btn-minus" onClick={handlePlayer2Minus}>-1 Resta</button>
-            <button className="btn-plus" onClick={handlePlayer2Plus}>+1 Suma</button>
-          </div>
-        </div>
+        {players.map((player) => (
+          <Player
+            key={player.id}
+            player={player}
+            showDeleteButton={players.length > 2}
+            onIncreaseCounter={() => increaseCounter(player)}
+            onDecreaseCounter={() => decreaseCounter(player)}
+            onDeletePlayer={() => removePlayer(player.id)}
+            onUpdateName={(name) => updatePlayerName(player.id, name)}
+          />
+        ))}
       </div>
-
-      <button className="restart-button" onClick={handleRestart}>Reiniciar</button>
     </main>
   )
 }
